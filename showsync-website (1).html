@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ShowSync — Find What's Worth Your Night</title>
+<meta name="description" content="India's first AI-powered cinema and events ticketing platform. 3D seat selection, snack pre-order, live availability, verified reviews. Zero convenience fee. Launching in Hyderabad."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+/* ── Reset & Root ─────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --orange:#FB923C;--rose:#F43F5E;--green:#10B981;--purple:#818CF8;
+  --cyan:#22D3EE;--yellow:#F59E0B;
+  --bg:#06090F;--bg2:#0D1525;--bg3:#111827;
+  --card:rgba(13,21,37,0.85);
+  --border:rgba(255,255,255,0.07);
+  --border2:rgba(255,255,255,0.12);
+  --text:#F8FAFC;--muted:#94A3B8;--faint:#1E293B;--slate:#334155;
+  --grad:linear-gradient(135deg,#FB923C,#F43F5E);
+  --grad-v:linear-gradient(180deg,#FB923C,#F43F5E);
+  --font-display:'Playfair Display',Georgia,serif;
+  --font-body:'DM Sans','Segoe UI',sans-serif;
+  --font-mono:'DM Mono',monospace;
+}
+html{scroll-behavior:smooth;font-size:16px}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);overflow-x:hidden;line-height:1.6;cursor:none}
+img,svg{display:block;max-width:100%}
+a{text-decoration:none;color:inherit}
+button{font-family:var(--font-body);cursor:pointer;border:none;outline:none}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--faint);border-radius:4px}
+::selection{background:rgba(251,146,60,0.3);color:var(--text)}
+
+/* ── Custom Cursor ────────────────────────────────────── */
+#cursor{position:fixed;width:10px;height:10px;background:var(--orange);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);mix-blend-mode:screen;transition:width .2s,height .2s;top:0;left:0}
+#cursor-ring{position:fixed;width:36px;height:36px;border:1.5px solid rgba(251,146,60,0.4);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:width .2s,height .2s;top:0;left:0}
+body:has(a:hover) #cursor,body:has(button:hover) #cursor{width:20px;height:20px}
+
+/* ── Navigation ───────────────────────────────────────── */
+.nav{position:fixed;top:0;left:0;right:0;z-index:500;height:70px;display:flex;align-items:center;justify-content:space-between;padding:0 5%;background:rgba(6,9,15,0.82);backdrop-filter:blur(24px);border-bottom:1px solid var(--border);transition:all .3s}
+.nav.scrolled{background:rgba(6,9,15,0.97);border-color:rgba(251,146,60,0.15)}
+.nav-logo{font-family:var(--font-display);font-size:24px;font-weight:900;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-0.5px}
+.nav-links{display:flex;gap:32px;align-items:center}
+.nav-links a{font-size:13px;font-weight:500;color:var(--muted);transition:color .2s}
+.nav-links a:hover{color:var(--text)}
+.nav-right{display:flex;gap:10px;align-items:center}
+.btn-outline{background:transparent;border:1px solid var(--border2);color:var(--muted);border-radius:10px;padding:8px 18px;font-size:13px;font-weight:600;transition:all .2s}
+.btn-outline:hover{border-color:rgba(251,146,60,0.4);color:var(--orange)}
+.btn-primary{background:var(--grad);color:#fff;border-radius:10px;padding:9px 22px;font-size:13px;font-weight:700;transition:transform .15s,box-shadow .2s;box-shadow:0 4px 20px rgba(251,146,60,0.2)}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 8px 28px rgba(251,146,60,0.35)}
+.nav-badge{background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.3);color:var(--green);font-size:10px;font-weight:800;padding:2px 9px;border-radius:20px;letter-spacing:0.5px}
+.hamburger{display:none;flex-direction:column;gap:5px;background:none;border:none;padding:4px;cursor:pointer}
+.hamburger span{width:22px;height:2px;background:var(--muted);border-radius:2px;display:block;transition:all .3s}
+
+/* ── Hero ─────────────────────────────────────────────── */
+.hero{min-height:100vh;position:relative;overflow:hidden;display:flex;align-items:center;padding:100px 5% 80px}
+.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 60% 30%,rgba(251,146,60,0.08) 0%,transparent 60%),radial-gradient(ellipse 50% 50% at 20% 80%,rgba(244,63,94,0.05) 0%,transparent 60%),var(--bg)}
+.hero-grid{position:absolute;inset:0;opacity:.022;background-image:linear-gradient(var(--orange) 1px,transparent 1px),linear-gradient(90deg,var(--orange) 1px,transparent 1px);background-size:60px 60px}
+.hero-content{position:relative;z-index:2;max-width:660px}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(251,146,60,0.1);border:1px solid rgba(251,146,60,0.25);border-radius:20px;padding:6px 16px;margin-bottom:28px;font-size:11px;font-weight:700;color:var(--orange);letter-spacing:1.5px;text-transform:uppercase;animation:fadeUp .6s both}
+.hero-eyebrow::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse2 2s infinite}
+.hero-h1{font-family:var(--font-display);font-size:clamp(46px,7vw,90px);font-weight:900;line-height:1.0;letter-spacing:-2.5px;margin-bottom:24px;animation:fadeUp .6s .1s both}
+.hero-h1 .line-plain{color:var(--text)}
+.hero-h1 .line-grad{background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-style:italic}
+.hero-sub{font-size:18px;color:var(--muted);line-height:1.75;max-width:540px;margin-bottom:40px;animation:fadeUp .6s .2s both;font-weight:400}
+.hero-sub strong{color:var(--text);font-weight:600}
+.hero-actions{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:48px;animation:fadeUp .6s .3s both}
+.hero-btn-p{background:var(--grad);color:#fff;border-radius:14px;padding:16px 34px;font-size:15px;font-weight:700;transition:transform .2s,box-shadow .2s;box-shadow:0 8px 32px rgba(251,146,60,0.28);display:flex;align-items:center;gap:8px}
+.hero-btn-p:hover{transform:translateY(-2px);box-shadow:0 14px 40px rgba(251,146,60,0.4)}
+.hero-btn-g{background:transparent;color:var(--muted);border:1px solid var(--border2);border-radius:14px;padding:15px 28px;font-size:14px;font-weight:600;transition:all .2s;display:flex;align-items:center;gap:7px}
+.hero-btn-g:hover{border-color:rgba(251,146,60,0.35);color:var(--text)}
+.hero-trust{display:flex;align-items:center;gap:20px;animation:fadeUp .6s .4s both;flex-wrap:wrap}
+.trust-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+.trust-dot{width:5px;height:5px;border-radius:50%;background:var(--green)}
+/* Floating cards right */
+.hero-visual{position:absolute;right:4%;top:50%;transform:translateY(-50%);width:min(430px,42%);display:flex;flex-direction:column;gap:12px;z-index:2;animation:fadeLeft .8s .4s both}
+@media(max-width:960px){.hero-visual{display:none}}
+.hv-card{background:rgba(13,21,37,0.92);backdrop-filter:blur(16px);border:1px solid var(--border2);border-radius:16px;padding:16px;transition:transform .3s,border-color .3s}
+.hv-card:hover{transform:translateX(-5px);border-color:rgba(251,146,60,0.3)}
+.hv-card-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.hv-title{font-size:13px;font-weight:700}
+.hv-sub{font-size:11px;color:var(--muted)}
+.live-pill{display:flex;align-items:center;gap:5px;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.25);border-radius:10px;padding:3px 10px;font-size:10px;font-weight:700;color:var(--green)}
+.live-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:pulse2 1.4s infinite}
+.ai-card{background:rgba(13,21,37,0.9);border:1px solid rgba(251,146,60,0.2);border-radius:14px;padding:14px 16px;display:flex;gap:10px;align-items:flex-start}
+.ai-icon{width:32px;height:32px;border-radius:10px;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.ai-text p{font-size:12px;color:var(--muted);line-height:1.5}
+.ai-text span{color:var(--orange);font-weight:600}
+/* Mini seat grid */
+.mini-seats{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;margin-top:8px}
+.ms{height:12px;border-radius:3px 3px 2px 2px}
+.ms.a{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.06)}
+.ms.t{background:rgba(255,255,255,0.03)}
+.ms.s{background:var(--grad)}
+.ms.b{background:rgba(16,185,129,0.25);border:1px solid rgba(16,185,129,0.3)}
+
+/* ── Stats Bar ────────────────────────────────────────── */
+.stats-bar{padding:0 5%;background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.stats-inner{display:grid;grid-template-columns:repeat(4,1fr);gap:0}
+.stat-item{padding:28px 24px;text-align:center;border-right:1px solid var(--border);position:relative}
+.stat-item:last-child{border-right:none}
+.stat-val{font-family:var(--font-display);font-size:34px;font-weight:900;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;margin-bottom:4px}
+.stat-label{font-size:11px;color:var(--muted);font-weight:500;letter-spacing:0.3px}
+
+/* ── Section Utilities ─────────────────────────────────── */
+.sec{padding:90px 5%}
+.sec-dark{background:var(--bg2)}
+.sec-eyebrow{font-size:10px;font-weight:700;color:var(--orange);letter-spacing:2.5px;text-transform:uppercase;margin-bottom:10px}
+.sec-title{font-family:var(--font-display);font-size:clamp(32px,5vw,52px);font-weight:900;line-height:1.1;letter-spacing:-1.5px;margin-bottom:16px}
+.sec-title em{font-style:italic;color:var(--orange)}
+.sec-sub{font-size:17px;color:var(--muted);max-width:580px;line-height:1.7;margin-bottom:48px}
+.sec-center{text-align:center}
+.sec-center .sec-sub{margin-left:auto;margin-right:auto}
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .7s ease,transform .7s ease}
+.reveal.vis{opacity:1;transform:none}
+
+/* ── Feature Cards Grid ───────────────────────────────── */
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+@media(max-width:900px){.features-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.features-grid{grid-template-columns:1fr}}
+.feature-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:28px;position:relative;overflow:hidden;transition:transform .3s,border-color .3s,box-shadow .3s;cursor:default}
+.feature-card:hover{transform:translateY(-5px);border-color:rgba(251,146,60,0.25);box-shadow:0 20px 50px rgba(0,0,0,0.35)}
+.feature-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--card-accent,var(--grad));opacity:0;transition:opacity .3s}
+.feature-card:hover::before{opacity:1}
+.fc-icon{font-size:32px;margin-bottom:16px}
+.fc-badge{display:inline-block;font-size:9px;font-weight:800;padding:2px 8px;border-radius:8px;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px}
+.fc-badge.new{background:rgba(16,185,129,0.12);color:var(--green);border:1px solid rgba(16,185,129,0.25)}
+.fc-badge.excl{background:rgba(244,63,94,0.12);color:var(--rose);border:1px solid rgba(244,63,94,0.25)}
+.fc-badge.ai{background:rgba(129,140,248,0.12);color:var(--purple);border:1px solid rgba(129,140,248,0.25)}
+.fc-title{font-family:var(--font-display);font-size:20px;font-weight:700;margin-bottom:8px}
+.fc-desc{font-size:13px;color:var(--muted);line-height:1.65}
+
+/* ── How It Works ─────────────────────────────────────── */
+.steps-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:0;position:relative}
+.steps-grid::before{content:'';position:absolute;top:40px;left:10%;right:10%;height:1px;background:linear-gradient(90deg,transparent,var(--orange),var(--rose),transparent)}
+@media(max-width:900px){.steps-grid{grid-template-columns:1fr;gap:24px}.steps-grid::before{display:none}}
+.step{text-align:center;padding:20px 12px;position:relative}
+.step-num{width:52px;height:52px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:18px;font-weight:900;color:#fff;margin:0 auto 16px;position:relative;z-index:2;box-shadow:0 0 0 8px rgba(251,146,60,0.1)}
+.step-icon{font-size:24px;margin-bottom:10px}
+.step-title{font-size:14px;font-weight:700;margin-bottom:6px}
+.step-desc{font-size:12px;color:var(--muted);line-height:1.55}
+
+/* ── Deep Feature: 3D Theater ─────────────────────────── */
+.theater-showcase{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+@media(max-width:900px){.theater-showcase{grid-template-columns:1fr}}
+.theater-demo{background:var(--bg);border:1px solid var(--border2);border-radius:24px;padding:28px;position:relative;overflow:hidden}
+.theater-demo::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(251,146,60,0.06) 0%,transparent 60%)}
+.screen-glow{height:4px;background:linear-gradient(90deg,transparent,rgba(129,140,248,0.8),transparent);border-radius:2px;margin-bottom:6px}
+.screen-label{text-align:center;font-size:9px;color:#475569;letter-spacing:4px;text-transform:uppercase;margin-bottom:18px}
+.t3d-grid{display:flex;flex-direction:column;gap:5px;align-items:center}
+.t3d-row{display:flex;align-items:center;gap:3px}
+.t3d-label{font-size:9px;font-weight:800;width:16px;text-align:center;flex-shrink:0}
+.t3d-seat{width:28px;height:18px;border-radius:4px 4px 3px 3px;cursor:pointer;border:1px solid transparent;transition:all .15s}
+.t3d-seat.av{background:rgba(255,255,255,0.07);border-color:rgba(255,255,255,0.06)}
+.t3d-seat.av:hover{background:rgba(251,146,60,0.25);border-color:rgba(251,146,60,0.5)}
+.t3d-seat.tk{background:rgba(255,255,255,0.03);cursor:not-allowed}
+.t3d-seat.sl{background:var(--grad);border-color:transparent}
+.t3d-seat.bv{background:rgba(16,185,129,0.14);border-color:rgba(16,185,129,0.25)}
+.t3d-seat.bv:hover{background:rgba(16,185,129,0.3)}
+.t3d-seat.fi{background:rgba(245,158,11,0.14);border-color:rgba(245,158,11,0.25)}
+.t3d-aisle{width:16px}
+.seat-legend{display:flex;gap:16px;justify-content:center;margin-top:16px;flex-wrap:wrap}
+.sl-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted)}
+.sl-dot{width:12px;height:8px;border-radius:2px}
+.zone-info{margin-top:16px;background:rgba(251,146,60,0.08);border:1px solid rgba(251,146,60,0.18);border-radius:12px;padding:10px 14px;text-align:center}
+.zone-info p{font-size:11px;color:var(--orange);font-style:italic}
+.theater-info{display:flex;flex-direction:column;gap:20px}
+.ti-point{display:flex;gap:14px;align-items:flex-start}
+.ti-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.ti-text h4{font-size:15px;font-weight:700;margin-bottom:4px}
+.ti-text p{font-size:13px;color:var(--muted);line-height:1.55}
+
+/* ── Snack Section ────────────────────────────────────── */
+.snack-showcase{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+@media(max-width:900px){.snack-showcase{grid-template-columns:1fr}}
+.snack-demo{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.snack-card{background:var(--bg);border:1px solid var(--border);border-radius:16px;padding:16px;text-align:center;transition:all .2s;cursor:pointer;position:relative}
+.snack-card:hover{border-color:rgba(251,146,60,0.3);transform:translateY(-3px)}
+.snack-card.active-snack{background:rgba(251,146,60,0.07);border-color:rgba(251,146,60,0.35)}
+.snack-emoji{font-size:32px;margin-bottom:8px;display:block}
+.snack-name{font-size:12px;font-weight:700;margin-bottom:3px}
+.snack-price{font-size:11px;color:var(--orange);font-weight:700;margin-bottom:10px}
+.snack-qty-row{display:flex;align-items:center;justify-content:center;gap:8px}
+.sq-btn{width:24px;height:24px;border-radius:7px;font-size:14px;font-weight:900;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.sq-minus{background:rgba(244,63,94,0.15);color:var(--rose)}
+.sq-plus{background:var(--grad);color:#fff}
+.sq-num{font-size:14px;font-weight:800;min-width:16px;text-align:center}
+.hot-tag{position:absolute;top:-6px;right:10px;background:var(--rose);color:#fff;font-size:8px;font-weight:800;padding:2px 7px;border-radius:0 0 6px 6px;letter-spacing:0.5px}
+.snack-summary{background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);border-radius:14px;padding:14px 16px;margin-top:12px;display:flex;justify-content:space-between;align-items:center}
+.ss-left p{font-size:12px;color:var(--muted)}
+.ss-left strong{font-size:14px;font-weight:700;color:var(--text)}
+.ss-right{text-align:right}
+.ss-right .saved{font-size:11px;color:var(--green)}
+.ss-right .total{font-size:18px;font-weight:800;color:var(--orange);font-family:var(--font-display)}
+
+/* ── AI Discovery Section ─────────────────────────────── */
+.ai-showcase{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start}
+@media(max-width:900px){.ai-showcase{grid-template-columns:1fr}}
+.ai-chat{background:var(--bg);border:1px solid var(--border2);border-radius:20px;overflow:hidden}
+.ai-chat-header{padding:16px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.ai-avatar-sm{width:34px;height:34px;border-radius:10px;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.ai-hdr-text h5{font-size:13px;font-weight:700}
+.ai-hdr-text p{font-size:10px;color:var(--muted)}
+.ai-online-badge{margin-left:auto;display:flex;align-items:center;gap:4px;font-size:10px;font-weight:600;color:var(--green)}
+.ai-online-badge::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--green);animation:pulse2 2s infinite}
+.ai-messages{padding:16px 18px;display:flex;flex-direction:column;gap:12px;min-height:240px}
+.ai-msg{display:flex;gap:8px;align-items:flex-start}
+.ai-msg.user{flex-direction:row-reverse}
+.ai-bubble{padding:10px 14px;border-radius:14px;font-size:12.5px;line-height:1.55;max-width:82%}
+.ai-msg.bot .ai-bubble{background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:14px 14px 14px 4px;color:var(--text)}
+.ai-msg.user .ai-bubble{background:var(--grad);color:#fff;border-radius:14px 14px 4px 14px}
+.ai-msg-av{width:26px;height:26px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px}
+.ai-msg-av.bot-av{background:var(--grad)}
+.ai-msg-av.usr-av{background:rgba(255,255,255,0.1)}
+.ai-rec-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.ai-rec-row::-webkit-scrollbar{display:none}
+.ai-rec-chip{background:rgba(251,146,60,0.1);border:1px solid rgba(251,146,60,0.2);border-radius:10px;padding:8px 12px;flex-shrink:0;min-width:140px}
+.arc-emoji{font-size:18px;margin-bottom:4px}
+.arc-title{font-size:11px;font-weight:700;margin-bottom:2px}
+.arc-meta{font-size:10px;color:var(--muted)}
+.arc-match{font-size:10px;color:var(--orange);font-weight:700;margin-top:4px}
+.ai-input-row{padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:8px}
+.ai-inp{flex:1;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:10px;padding:9px 13px;color:var(--text);font-size:12px;font-family:var(--font-body)}
+.ai-inp::placeholder{color:#334155}
+.ai-send-btn{width:36px;height:36px;border-radius:10px;background:var(--grad);color:#fff;font-size:15px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.mood-chips-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.mood-chip{background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:20px;padding:7px 15px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .2s;flex-shrink:0}
+.mood-chip:hover,.mood-chip.active{background:rgba(251,146,60,0.1);border-color:rgba(251,146,60,0.35);color:var(--orange)}
+
+/* ── Live Seats Feature ───────────────────────────────── */
+.live-showcase{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+@media(max-width:900px){.live-showcase{grid-template-columns:1fr}}
+.live-demo{background:var(--bg);border:1px solid var(--border2);border-radius:20px;overflow:hidden}
+.live-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.live-title-sm{font-size:13px;font-weight:700}
+.live-timer{font-size:11px;color:var(--green);display:flex;align-items:center;gap:4px;font-family:var(--font-mono)}
+.live-timer::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--green);animation:pulse2 1.4s infinite}
+.live-body{padding:18px}
+.live-stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:0;background:var(--border);margin-top:12px}
+.ls-stat{background:var(--bg);padding:10px 8px;text-align:center}
+.ls-val{font-family:var(--font-display);font-size:18px;font-weight:900;margin-bottom:2px}
+.ls-lbl{font-size:9px;color:var(--muted);letter-spacing:0.3px}
+
+/* ── Theatre Gallery ──────────────────────────────────── */
+.gallery-showcase{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;border-radius:20px;overflow:hidden;margin-bottom:20px}
+.gallery-cell{aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;font-size:56px;position:relative;cursor:pointer;overflow:hidden;transition:transform .4s}
+.gallery-cell:hover .gc-inner{transform:scale(1.05)}
+.gallery-cell:first-child{grid-row:span 2;font-size:80px}
+.gc-inner{width:100%;height:100%;display:flex;align-items:center;justify-content:center;transition:transform .4s}
+.gc-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,transparent 50%,rgba(6,9,15,0.85) 100%);opacity:0;transition:opacity .3s}
+.gallery-cell:hover .gc-overlay{opacity:1}
+.gc-label{position:absolute;bottom:10px;left:12px;font-size:11px;font-weight:700;color:#fff;opacity:0;transition:opacity .3s;z-index:2}
+.gallery-cell:hover .gc-label{opacity:1}
+.gallery-theatre-tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+.gtt{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:9px 18px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .2s}
+.gtt:hover,.gtt.active{background:rgba(251,146,60,0.1);border-color:rgba(251,146,60,0.35);color:var(--orange)}
+
+/* ── Reviews Section ──────────────────────────────────── */
+.reviews-grid{display:grid;grid-template-columns:auto 1fr;gap:40px;align-items:start}
+@media(max-width:900px){.reviews-grid{grid-template-columns:1fr}}
+.rating-big-box{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:28px;text-align:center;min-width:200px}
+.rb-num{font-family:var(--font-display);font-size:72px;font-weight:900;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1}
+.rb-stars{font-size:22px;color:var(--yellow);letter-spacing:3px;margin:8px 0}
+.rb-count{font-size:12px;color:var(--muted)}
+.rb-bars{margin-top:20px;display:flex;flex-direction:column;gap:7px}
+.rbb-row{display:flex;align-items:center;gap:8px}
+.rbb-lbl{font-size:11px;color:var(--muted);width:14px;text-align:right}
+.rbb-track{flex:1;height:6px;background:rgba(255,255,255,0.07);border-radius:3px;overflow:hidden}
+.rbb-fill{height:100%;border-radius:3px;background:var(--grad);transition:width 1.5s ease}
+.rbb-cnt{font-size:10px;color:var(--muted);width:32px}
+.review-cards{display:flex;flex-direction:column;gap:14px}
+.rv-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:20px;transition:border-color .2s}
+.rv-card:hover{border-color:rgba(251,146,60,0.2)}
+.rv-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.rv-user{display:flex;align-items:center;gap:10px}
+.rv-av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.rv-name{font-size:13px;font-weight:700;margin-bottom:2px}
+.rv-meta{font-size:10px;color:var(--muted)}
+.rv-stars{font-size:13px;color:var(--yellow)}
+.rv-body{font-size:12.5px;color:var(--muted);line-height:1.65;margin-bottom:10px}
+.rv-tags{display:flex;gap:6px;flex-wrap:wrap}
+.rv-tag{font-size:9px;font-weight:700;padding:2px 8px;border-radius:6px;background:rgba(255,255,255,0.05);color:var(--muted);border:1px solid var(--border)}
+.verified-badge{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--green);font-weight:600;margin-top:8px}
+
+/* ── Zero Fee Section ─────────────────────────────────── */
+.fee-compare{display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:700px;margin:0 auto 40px}
+@media(max-width:600px){.fee-compare{grid-template-columns:1fr}}
+.fee-box{border-radius:20px;padding:28px;text-align:center}
+.fee-box.bms{background:rgba(244,63,94,0.06);border:1px solid rgba(244,63,94,0.2)}
+.fee-box.ss{background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.2)}
+.fee-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px}
+.fee-box.bms .fee-label{color:var(--rose)}
+.fee-box.ss .fee-label{color:var(--green)}
+.fee-amount{font-family:var(--font-display);font-size:52px;font-weight:900;line-height:1;margin-bottom:8px}
+.fee-box.bms .fee-amount{color:var(--rose)}
+.fee-box.ss .fee-amount{color:var(--green)}
+.fee-sub{font-size:12px;color:var(--muted)}
+
+/* ── Comparison Table ─────────────────────────────────── */
+.compare-table{width:100%;max-width:820px;margin:0 auto;border-radius:20px;overflow:hidden;border:1px solid var(--border)}
+.ct-header{display:grid;grid-template-columns:1fr 120px 140px;background:var(--faint)}
+.ct-row{display:grid;grid-template-columns:1fr 120px 140px;border-top:1px solid var(--border);transition:background .15s}
+.ct-row:hover{background:rgba(255,255,255,0.02)}
+.ct-cell{padding:13px 18px;font-size:12.5px;display:flex;align-items:center}
+.ct-header .ct-cell{font-size:11px;font-weight:700;color:var(--muted);padding:12px 18px}
+.ct-cell.center{justify-content:center;text-align:center}
+.ct-check{font-size:16px}
+.ct-check.y{color:var(--green);font-weight:800}
+.ct-check.n{color:var(--slate)}
+.ct-check.p{color:var(--orange);font-size:11px;font-weight:700;background:rgba(251,146,60,0.1);padding:2px 7px;border-radius:8px}
+.new-tag{font-size:8px;font-weight:800;background:rgba(16,185,129,0.15);color:var(--green);padding:1px 6px;border-radius:5px;margin-left:6px;border:1px solid rgba(16,185,129,0.25);flex-shrink:0}
+.ct-ss-header{background:rgba(251,146,60,0.12);color:var(--orange)!important}
+
+/* ── For Organisers ───────────────────────────────────── */
+.org-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+@media(max-width:900px){.org-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.org-grid{grid-template-columns:1fr}}
+.org-card{background:var(--bg);border:1px solid var(--border);border-radius:18px;padding:24px;transition:all .2s}
+.org-card:hover{border-color:rgba(251,146,60,0.25);transform:translateY(-3px)}
+.org-num{font-family:var(--font-display);font-size:40px;font-weight:900;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px;line-height:1}
+.org-title{font-size:15px;font-weight:700;margin-bottom:6px}
+.org-desc{font-size:12.5px;color:var(--muted);line-height:1.6}
+
+/* ── Pricing ──────────────────────────────────────────── */
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:860px;margin:0 auto}
+@media(max-width:900px){.pricing-grid{grid-template-columns:1fr;max-width:400px}}
+.price-card{background:var(--bg2);border:1px solid var(--border);border-radius:22px;padding:30px;position:relative;transition:all .3s}
+.price-card.featured{background:rgba(251,146,60,0.06);border-color:rgba(251,146,60,0.35);transform:scale(1.03)}
+.price-card:hover{border-color:rgba(251,146,60,0.3)}
+.price-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--grad);color:#fff;font-size:10px;font-weight:800;padding:4px 14px;border-radius:20px;letter-spacing:0.5px;white-space:nowrap}
+.price-plan{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px}
+.price-amount{font-family:var(--font-display);font-size:40px;font-weight:900;margin-bottom:4px;line-height:1}
+.price-period{font-size:12px;color:var(--muted)}
+.price-divider{height:1px;background:var(--border);margin:20px 0}
+.price-features{display:flex;flex-direction:column;gap:9px;margin-bottom:24px}
+.pf-item{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+.pf-item.on{color:var(--text)}
+.pf-icon{font-size:12px;width:16px;flex-shrink:0}
+.price-btn{width:100%;padding:12px;border-radius:12px;font-size:13px;font-weight:700;transition:all .2s;border:none;cursor:pointer;font-family:var(--font-body)}
+.price-btn.solid{background:var(--grad);color:#fff;box-shadow:0 4px 20px rgba(251,146,60,0.25)}
+.price-btn.solid:hover{box-shadow:0 8px 28px rgba(251,146,60,0.4);transform:translateY(-1px)}
+.price-btn.ghost{background:transparent;border:1px solid var(--border2);color:var(--muted)}
+.price-btn.ghost:hover{border-color:rgba(251,146,60,0.3);color:var(--text)}
+
+/* ── Download CTA ─────────────────────────────────────── */
+.cta-section{padding:90px 5%;text-align:center;position:relative;overflow:hidden}
+.cta-bg{position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 50% 50%,rgba(251,146,60,0.07) 0%,transparent 70%)}
+.cta-content{position:relative;z-index:2}
+.cta-h2{font-family:var(--font-display);font-size:clamp(36px,6vw,64px);font-weight:900;letter-spacing:-2px;margin-bottom:16px;line-height:1.05}
+.cta-h2 em{font-style:italic;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.cta-sub{font-size:17px;color:var(--muted);max-width:520px;margin:0 auto 36px;line-height:1.7}
+.cta-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:28px}
+.app-btn{display:flex;align-items:center;gap:10px;background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:13px 22px;transition:all .2s;cursor:pointer}
+.app-btn:hover{border-color:rgba(251,146,60,0.35);transform:translateY(-2px)}
+.app-btn-icon{font-size:24px}
+.app-btn-text small{display:block;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.app-btn-text strong{font-size:15px;font-weight:700}
+.cta-note{font-size:12px;color:var(--slate);display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap}
+.cta-note span{display:flex;align-items:center;gap:5px}
+
+/* ── Footer ───────────────────────────────────────────── */
+footer{background:var(--bg2);border-top:1px solid var(--border);padding:60px 5% 30px}
+.footer-top{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;margin-bottom:48px}
+@media(max-width:900px){.footer-top{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.footer-top{grid-template-columns:1fr}}
+.footer-brand .fb-logo{font-family:var(--font-display);font-size:26px;font-weight:900;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:10px}
+.footer-brand p{font-size:13px;color:var(--muted);line-height:1.65;max-width:280px;margin-bottom:16px}
+.footer-socials{display:flex;gap:10px}
+.fs-btn{width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.05);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;transition:all .2s;color:var(--muted)}
+.fs-btn:hover{border-color:rgba(251,146,60,0.3);color:var(--orange)}
+.footer-col h5{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:14px}
+.footer-col a{display:block;font-size:13px;color:var(--slate);margin-bottom:9px;cursor:pointer;transition:color .2s}
+.footer-col a:hover{color:var(--orange)}
+.footer-bottom{border-top:1px solid var(--border);padding-top:24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.footer-copy{font-size:12px;color:var(--slate)}
+.footer-made{font-size:12px;color:var(--slate);display:flex;align-items:center;gap:4px}
+.footer-made a{color:var(--orange)}
+
+/* ── Announcement Banner ──────────────────────────────── */
+.ann-banner{background:var(--grad);padding:10px 20px;text-align:center;font-size:12px;font-weight:600;color:#fff;display:flex;align-items:center;justify-content:center;gap:10px;position:relative;z-index:600}
+.ann-banner a{color:#fff;text-decoration:underline;opacity:0.85}
+.ann-close{background:none;border:none;color:#fff;opacity:0.7;cursor:pointer;font-size:16px;position:absolute;right:16px;top:50%;transform:translateY(-50%)}
+
+/* ── Scroll to top ────────────────────────────────────── */
+.scroll-top{position:fixed;bottom:28px;right:24px;z-index:300;width:44px;height:44px;border-radius:50%;background:var(--grad);color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;transform:translateY(20px);transition:all .3s;box-shadow:0 4px 20px rgba(251,146,60,0.35);border:none}
+.scroll-top.visible{opacity:1;transform:none}
+
+/* ── Animations ───────────────────────────────────────── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:none}}
+@keyframes fadeLeft{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:none}}
+@keyframes pulse2{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes tickerMove{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* ── Ticker ───────────────────────────────────────────── */
+.ticker-wrap{overflow:hidden;background:var(--faint);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:10px 0}
+.ticker-track{display:flex;width:max-content;animation:tickerMove 28s linear infinite}
+.ticker-item{display:flex;align-items:center;gap:8px;padding:0 28px;font-size:12px;color:var(--muted);white-space:nowrap}
+.ticker-sep{color:var(--orange);font-size:8px}
+
+/* ── Responsive ───────────────────────────────────────── */
+@media(max-width:768px){
+  .nav-links{display:none}
+  .hamburger{display:flex}
+  .nav-right .btn-outline{display:none}
+  .stats-inner{grid-template-columns:repeat(2,1fr)}
+  .stat-item:nth-child(2){border-right:none}
+  .hero-h1{letter-spacing:-1.5px}
+  .sec{padding:60px 5%}
+  .theater-showcase,.snack-showcase,.ai-showcase,.live-showcase{grid-template-columns:1fr;gap:32px}
+  .gallery-showcase{grid-template-columns:repeat(2,1fr)}
+  .gallery-cell:first-child{grid-row:auto}
+  .reviews-grid{grid-template-columns:1fr}
+  .fee-compare{grid-template-columns:1fr}
+  .pricing-grid{max-width:100%}
+  .footer-top{grid-template-columns:1fr}
+  .footer-bottom{flex-direction:column;text-align:center}
+  .ct-header,.ct-row{grid-template-columns:1fr 80px 90px}
+}
+</style>
+</head>
+<body>
+
+<!-- Cursor -->
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<!-- Scroll to top -->
+<button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<!-- Announcement Banner -->
+<div class="ann-banner" id="annBanner">
+  🚀 ShowSync is launching in Hyderabad — Zero Convenience Fee, Always. &nbsp;<a href="#waitlist">Join the waitlist →</a>
+  <button class="ann-close" onclick="document.getElementById('annBanner').remove()">✕</button>
+</div>
+
+<!-- Navigation -->
+<nav class="nav" id="nav">
+  <div class="nav-logo">ShowSync</div>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#how-it-works">How It Works</a>
+    <a href="#theatres">Theatres</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#organisers">For Organisers</a>
+  </div>
+  <div class="nav-right">
+    <span class="nav-badge">Hyderabad Launch</span>
+    <button class="btn-outline">Sign In</button>
+    <button class="btn-primary" onclick="document.getElementById('waitlist').scrollIntoView({behavior:'smooth'})">Book Now →</button>
+  </div>
+  <button class="hamburger" id="hamburger" onclick="toggleMenu()">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- Hero -->
+<section class="hero" id="home">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">Now Live in Hyderabad</div>
+    <h1 class="hero-h1">
+      <span class="line-plain">Find What's</span><br>
+      <span class="line-grad">Worth Your Night.</span>
+    </h1>
+    <p class="hero-sub">
+      India's first AI-powered cinema and events ticketing platform. <strong>3D seat selection</strong>, <strong>snack pre-order</strong>, <strong>live seat availability</strong>, <strong>verified reviews</strong> — and <strong>zero convenience fee</strong>. Always.
+    </p>
+    <div class="hero-actions">
+      <button class="hero-btn-p" onclick="document.getElementById('features').scrollIntoView({behavior:'smooth'})">
+        ✦ Explore Features
+      </button>
+      <button class="hero-btn-g" onclick="document.getElementById('how-it-works').scrollIntoView({behavior:'smooth'})">
+        ▶ How It Works
+      </button>
+    </div>
+    <div class="hero-trust">
+      <div class="trust-item"><div class="trust-dot"></div>Zero convenience fee</div>
+      <div class="trust-item"><div class="trust-dot"></div>3D seat preview</div>
+      <div class="trust-item"><div class="trust-dot"></div>AI-powered picks</div>
+      <div class="trust-item"><div class="trust-dot"></div>Snack pre-order</div>
+    </div>
+  </div>
+
+  <!-- Hero Visual -->
+  <div class="hero-visual">
+    <div class="ai-card">
+      <div class="ai-icon">✦</div>
+      <div class="ai-text">
+        <p>AI says: <span>"Devara Part 2 at Sudarshan 35MM — 96% match with your action taste tonight"</span></p>
+      </div>
+    </div>
+    <div class="hv-card">
+      <div class="hv-card-top">
+        <div><div class="hv-title">Kalki 2898 AD · PVR IMAX</div><div class="hv-sub">Today · 6:30 PM · ₹350/seat</div></div>
+        <div class="live-pill"><div class="live-dot"></div>Live</div>
+      </div>
+      <div class="mini-seats">
+        <div class="ms t"></div><div class="ms t"></div><div class="ms a"></div><div class="ms a"></div><div class="ms a"></div><div class="ms t"></div><div class="ms a"></div><div class="ms a"></div>
+        <div class="ms a"></div><div class="ms a"></div><div class="ms t"></div><div class="ms a"></div><div class="ms s"></div><div class="ms s"></div><div class="ms a"></div><div class="ms a"></div>
+        <div class="ms bv"></div><div class="ms bv"></div><div class="ms bv"></div><div class="ms a"></div><div class="ms a"></div><div class="ms bv"></div><div class="ms bv"></div><div class="ms t"></div>
+      </div>
+      <div style="margin-top:10px;font-size:11px;color:var(--orange)">✓ Seat E5 & E6 selected · ₹700 · ₹0 fee 🎉</div>
+    </div>
+    <div class="hv-card" style="display:flex;gap:12px;align-items:center">
+      <span style="font-size:32px">🍿</span>
+      <div>
+        <div class="hv-title">Snack pre-ordered!</div>
+        <div class="hv-sub" style="margin-top:3px">Large Popcorn + Pepsi · ₹260</div>
+        <div style="font-size:11px;color:var(--green);margin-top:4px">Delivered to seat E5 at interval ✓</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Stats Bar -->
+<div class="stats-bar">
+  <div class="stats-inner">
+    <div class="stat-item"><div class="stat-val" id="sv1">₹0</div><div class="stat-label">Convenience Fee — Always</div></div>
+    <div class="stat-item"><div class="stat-val" id="sv2">21+</div><div class="stat-label">Exclusive Features</div></div>
+    <div class="stat-item"><div class="stat-val" id="sv3">20 min</div><div class="stat-label">Queue Time Saved via Snack Pre-Order</div></div>
+    <div class="stat-item"><div class="stat-val" id="sv4">94%</div><div class="stat-label">AI Recommendation Accuracy</div></div>
+  </div>
+</div>
+
+<!-- Ticker -->
+<div class="ticker-wrap">
+  <div class="ticker-track" id="ticker"></div>
+</div>
+
+<!-- ── FEATURES ──────────────────────────────────────── -->
+<section class="sec" id="features">
+  <div class="sec-center reveal">
+    <div class="sec-eyebrow">✦ What Makes Us Different</div>
+    <h2 class="sec-title">Everything BMS Should Have<br>Built. <em>We Did.</em></h2>
+    <p class="sec-sub">ShowSync is not just another ticketing app. Every feature is built around one question: what does a great cinema night actually feel like?</p>
+  </div>
+  <div class="features-grid reveal">
+    <div class="feature-card" style="--card-accent:linear-gradient(135deg,#818CF8,#6366F1)">
+      <div class="fc-icon">🤖</div>
+      <div class="fc-badge ai">AI Powered</div>
+      <div class="fc-title">AI Discovery Engine</div>
+      <p class="fc-desc">Tell ShowSync your mood — or just describe your evening in plain words — and our Gemini-powered AI builds a personalised feed of movies and events that actually match your taste. Not what's popular. What's right for <em>you</em>, tonight.</p>
+    </div>
+    <div class="feature-card" style="--card-accent:linear-gradient(135deg,#FB923C,#F43F5E)">
+      <div class="fc-icon">🎭</div>
+      <div class="fc-badge excl">Exclusive</div>
+      <div class="fc-title">3D Theater Visualization</div>
+      <p class="fc-desc">See the exact view from every seat before you book. Our interactive 3D theater map shows screen angle, distance, legroom zone, and seat quality. Front rows, best-view rows, filling-fast zones — all colour-coded and visible in real time. No other Indian platform has this.</p>
+    </div>
+    <div class="feature-card" style="--card-accent:linear-gradient(135deg,#10B981,#059669)">
+      <div class="fc-icon">🍿</div>
+      <div class="fc-badge excl">Exclusive</div>
+      <div class="fc-title">Snack Pre-Order</div>
+      <p class="fc-desc">Order your popcorn, nachos, drinks and combos while selecting your seat. Skip the 20-minute queue entirely. Choose your delivery slot — we'll have it waiting at your seat when the interval begins. ShowSync is the first Indian ticketing platform to offer this.</p>
+    </div>
+    <div class="feature-card" style="--card-accent:linear-gradient(135deg,#F43F5E,#DC2626)">
+      <div class="fc-icon">🔴</div>
+      <div class="fc-badge new">New</div>
+      <div class="fc-title">Live Seat Availability</div>
+      <p class="fc-desc">Seat states update in real time via WebSockets — every 8 seconds. Watch seats fill up live as other users book. See how many seats remain, which zones are selling fast, and grab your spots before they're gone. Book with confidence, not guesswork.</p>
+    </div>
+    <div class="feature-card" style="--card-accent:linear-gradient(135deg,#22D3EE,#0891B2)">
+      <div class="fc-icon">🏛️</div>
+      <div class="fc-badge new">New</div>
+      <div class="fc-title">Theatre Photo Gallery</div>
+      <p class="fc-desc">See inside every theatre before you book. Real photos of the screen, seating zones, lobby, food court, and parking — uploaded directly by theatre partners. Read per-category ratings (screen quality, seats, sound, food) and choose the experience that suits your night.</p>
+    </div>
+    <div class="feature-card" style="--card-accent:linear-gradient(135deg,#F59E0B,#D97706)">
+      <div class="fc-icon">⭐</div>
+      <div class="fc-badge new">New</div>
+      <div class="fc-title">Verified Reviews</div>
+      <p class="fc-desc">Every review on ShowSync comes from someone who actually watched the film at that theatre. You need a confirmed booking to write a review, and reviews unlock 24 hours after showtime. No fake ratings. No paid promotions. No surprises.</p>
+    </div>
+    <div class="feature-card" style="--card-accent:linear-gradient(135deg,#10B981,#22D3EE)">
+      <div class="fc-icon">₹0</div>
+      <div class="fc-title">Zero Convenience Fee</div>
+      <p class="fc-desc">BookMyShow charges ₹20–99 per ticket just to click a button. ShowSync charges nothing. What you see is what you pay — every time, on every booking, for every user. Zero fees on tickets. Zero fees on snacks. Completely transparent from the first screen to the last.</p>
+    </div>
+    <div class="feature-card" style="--card-accent:linear-gradient(135deg,#818CF8,#A855F7)">
+      <div class="fc-icon">👥</div>
+      <div class="fc-title">Group Booking & Split Pay</div>
+      <p class="fc-desc">Planning a night out with friends? Share an invite link, everyone picks their own seat, and Razorpay Route splits the bill automatically — no one person pays for everyone. Seats are held for 10 minutes while your group joins. Cinema, made social.</p>
+    </div>
+    <div class="feature-card" style="--card-accent:linear-gradient(135deg,#F43F5E,#818CF8)">
+      <div class="fc-icon">↩️</div>
+      <div class="fc-title">Smart Cancellation</div>
+      <p class="fc-desc">Life happens. Cancel 3+ hours before the show for a 100% refund. Cancel 1–3 hours before for a 50% refund. Every refund is processed automatically via Razorpay — no calls, no emails, no waiting. The most honest cancellation policy in Indian ticketing.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── HOW IT WORKS ───────────────────────────────────── -->
+<section class="sec sec-dark" id="how-it-works">
+  <div class="sec-center reveal">
+    <div class="sec-eyebrow">The Booking Flow</div>
+    <h2 class="sec-title">Five Steps to a <em>Perfect Night</em></h2>
+    <p class="sec-sub">From mood to movie to snacks in under 3 minutes. Here's exactly how ShowSync works.</p>
+  </div>
+  <div class="steps-grid reveal">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-icon">🤖</div>
+      <div class="step-title">Tell the AI Your Mood</div>
+      <p class="step-desc">Type your mood, budget, or evening vibe. ShowSync's AI instantly builds a personalised pick list of movies and events in Hyderabad that match.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-icon">🎬</div>
+      <div class="step-title">Pick Your Movie & Show</div>
+      <p class="step-desc">Choose from real-time movie listings with trailers, ratings, cast, and runtime. Select the theatre and show time that works for you.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-icon">🎭</div>
+      <div class="step-title">Pick Your Seat in 3D</div>
+      <p class="step-desc">Browse our interactive 3D seat map. See zone quality, screen distance and filling-fast warnings — live. Click any seat to lock it for 10 minutes.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-icon">🍿</div>
+      <div class="step-title">Pre-Order Your Snacks</div>
+      <p class="step-desc">Add popcorn, nachos, drinks, or combo deals to your order. Choose your delivery slot. Your food will be ready at your seat — no queue, no missing the trailers.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-icon">🎟️</div>
+      <div class="step-title">Pay & Get Your Ticket</div>
+      <p class="step-desc">Pay via UPI, card, or wallet. Zero convenience fee added. Receive your QR e-ticket and booking confirmation instantly. Enjoy your night.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── 3D THEATER DEEP DIVE ──────────────────────────── -->
+<section class="sec" id="seat-view">
+  <div class="theater-showcase">
+    <div class="reveal">
+      <div class="sec-eyebrow">Exclusive Feature</div>
+      <h2 class="sec-title">See Your Seat<br><em>Before You Sit.</em></h2>
+      <p class="sec-sub">BookMyShow gives you a flat grid of letters and numbers. ShowSync shows you the actual cinema in 3D — so you know exactly what you're paying for before you confirm.</p>
+      <div class="theater-info">
+        <div class="ti-point">
+          <div class="ti-icon" style="background:rgba(251,146,60,0.12)">🎯</div>
+          <div class="ti-text"><h4>Screen Angle & Distance</h4><p>Every seat shows its angle to the screen and how many rows back it is — colour-coded by zone quality so you always know if you're in the best seats.</p></div>
+        </div>
+        <div class="ti-point">
+          <div class="ti-icon" style="background:rgba(16,185,129,0.12)">🟢</div>
+          <div class="ti-text"><h4>Zone Heatmap</h4><p>Best View (green), Mid Zone (amber), Front Row (red) — instantly visible. Know what you're booking without guessing from row letters.</p></div>
+        </div>
+        <div class="ti-point">
+          <div class="ti-icon" style="background:rgba(129,140,248,0.12)">⚡</div>
+          <div class="ti-text"><h4>Filling Fast Warnings</h4><p>Seats turning amber in real time means they're going fast. Pulsing borders on seats locked by other users right now. Never miss the last good seats again.</p></div>
+        </div>
+        <div class="ti-point">
+          <div class="ti-icon" style="background:rgba(34,211,238,0.12)">💺</div>
+          <div class="ti-text"><h4>Legroom Tier Display</h4><p>Premium rows with extra legroom are clearly marked — so you can choose comfort, not just proximity to the screen.</p></div>
+        </div>
+      </div>
+    </div>
+    <div class="theater-demo reveal">
+      <div class="screen-glow"></div>
+      <div class="screen-label">◀ SCREEN ▶</div>
+      <div class="t3d-grid" id="t3dGrid"></div>
+      <div class="seat-legend">
+        <div class="sl-item"><div class="sl-dot" style="background:rgba(16,185,129,0.4);border:1px solid rgba(16,185,129,0.6)"></div>Best View</div>
+        <div class="sl-item"><div class="sl-dot" style="background:rgba(245,158,11,0.25);border:1px solid rgba(245,158,11,0.5)"></div>Filling Fast</div>
+        <div class="sl-item"><div class="sl-dot" style="background:rgba(255,255,255,0.07)"></div>Available</div>
+        <div class="sl-item"><div class="sl-dot" style="background:var(--grad)"></div>Selected</div>
+        <div class="sl-item"><div class="sl-dot" style="background:rgba(255,255,255,0.03)"></div>Taken</div>
+      </div>
+      <div class="zone-info" id="zoneInfo"><p>Click any seat to select it — watch the zone info update live</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── SNACK PRE-ORDER ────────────────────────────────── -->
+<section class="sec sec-dark" id="snacks">
+  <div class="snack-showcase">
+    <div class="reveal">
+      <div class="sec-eyebrow">Exclusive Feature</div>
+      <h2 class="sec-title">Skip the Queue.<br><em>Snacks Await.</em></h2>
+      <p class="sec-sub">The cinema queue problem, solved. Order your food while booking your ticket — it'll be at your seat when the interval starts. ShowSync is the first Indian ticketing platform to offer this.</p>
+      <div style="display:flex;flex-direction:column;gap:14px;margin-top:8px">
+        <div class="ti-point">
+          <div class="ti-icon" style="background:rgba(16,185,129,0.12)">⚡</div>
+          <div class="ti-text"><h4>Zero Queue Guarantee</h4><p>Your order is prepared in advance by the theatre's F&B team. Walk straight to your seat — your snacks are already there.</p></div>
+        </div>
+        <div class="ti-point">
+          <div class="ti-icon" style="background:rgba(251,146,60,0.12)">🕐</div>
+          <div class="ti-text"><h4>Choose Your Delivery Slot</h4><p>Pick first half, interval, or second half delivery. We'll coordinate with the theatre team to get your order to your seat at exactly the right time.</p></div>
+        </div>
+        <div class="ti-point">
+          <div class="ti-icon" style="background:rgba(129,140,248,0.12)">🎁</div>
+          <div class="ti-text"><h4>Combo Deals Save You Money</h4><p>ShowSync combo deals bundle your ticket and snacks together at a lower total price than buying separately at the counter.</p></div>
+        </div>
+      </div>
+    </div>
+    <div class="reveal">
+      <div class="snack-demo" id="snackDemo"></div>
+      <div class="snack-summary" id="snackSummary" style="display:none">
+        <div class="ss-left">
+          <strong id="ssItems">Items selected</strong>
+          <p id="ssDelivery">Delivered to seat at interval</p>
+        </div>
+        <div class="ss-right">
+          <div class="saved">~20 min queue saved ✓</div>
+          <div class="total" id="ssTotal">₹0</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── AI DISCOVERY ───────────────────────────────────── -->
+<section class="sec" id="ai">
+  <div class="ai-showcase">
+    <div class="reveal">
+      <div class="sec-eyebrow">AI-Powered</div>
+      <h2 class="sec-title">What Are You in<br>the Mood for, <em>Tonight?</em></h2>
+      <p class="sec-sub">ShowSync's AI discovery engine doesn't just list what's playing. It learns what you love — and finds the perfect match for your mood, budget, and evening.</p>
+      <div class="mood-chips-row">
+        <div class="mood-chip active" onclick="setMood(this,'🎉 Party Vibes')">🎉 Party Vibes</div>
+        <div class="mood-chip" onclick="setMood(this,'❤️ Date Night')">❤️ Date Night</div>
+        <div class="mood-chip" onclick="setMood(this,'😂 Comedy Night')">😂 Comedy Night</div>
+        <div class="mood-chip" onclick="setMood(this,'🎵 Live Music')">🎵 Live Music</div>
+        <div class="mood-chip" onclick="setMood(this,'🍿 Movie Night')">🍿 Movie Night</div>
+        <div class="mood-chip" onclick="setMood(this,'⚡ Surprise Me')">⚡ Surprise Me</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div class="ti-point">
+          <div class="ti-icon" style="background:rgba(129,140,248,0.12)">🧠</div>
+          <div class="ti-text"><h4>Natural Language Search</h4><p>Type exactly what you want: "something fun this Saturday under ₹500 for a date" — ShowSync's AI understands and delivers.</p></div>
+        </div>
+        <div class="ti-point">
+          <div class="ti-icon" style="background:rgba(251,146,60,0.12)">📱</div>
+          <div class="ti-text"><h4>Your Weekend Push</h4><p>Every Friday morning, ShowSync sends you a personalised "Your Weekend" notification with picks curated specifically for you based on your taste history.</p></div>
+        </div>
+        <div class="ti-point">
+          <div class="ti-icon" style="background:rgba(16,185,129,0.12)">🎯</div>
+          <div class="ti-text"><h4>Match Score on Every Card</h4><p>Every recommendation shows exactly why ShowSync picked it for you — and how well it matches your current mood profile.</p></div>
+        </div>
+      </div>
+    </div>
+    <div class="ai-chat reveal" id="aiChat">
+      <div class="ai-chat-header">
+        <div class="ai-avatar-sm">✦</div>
+        <div class="ai-hdr-text"><h5>ShowSync AI</h5><p>Your personal entertainment guide</p></div>
+        <div class="ai-online-badge">Online</div>
+      </div>
+      <div class="ai-messages" id="aiMessages">
+        <div class="ai-msg bot">
+          <div class="ai-msg-av bot-av">✦</div>
+          <div class="ai-bubble">Hey! What are you in the mood for tonight? I'll find the perfect picks for you in Hyderabad. 🎬</div>
+        </div>
+        <div class="ai-msg user">
+          <div class="ai-msg-av usr-av">S</div>
+          <div class="ai-bubble">Something fun this Saturday under ₹500 for a date night</div>
+        </div>
+        <div class="ai-msg bot">
+          <div class="ai-msg-av bot-av">✦</div>
+          <div class="ai-bubble">Perfect! Here are your top picks for a date night under ₹500:</div>
+        </div>
+      </div>
+      <div style="padding:0 16px 12px">
+        <div class="ai-rec-row">
+          <div class="ai-rec-chip"><div class="arc-emoji">🎬</div><div class="arc-title">Devara Part 2</div><div class="arc-meta">Cinepolis · 7:30 PM</div><div class="arc-match">★ 94% match · ₹280</div></div>
+          <div class="ai-rec-chip"><div class="arc-emoji">😂</div><div class="arc-title">Zakir Khan Live</div><div class="arc-meta">Shilpakala · 8 PM</div><div class="arc-match">★ 91% match · ₹399</div></div>
+          <div class="ai-rec-chip"><div class="arc-emoji">🎵</div><div class="arc-title">Acoustic Sessions</div><div class="arc-meta">Hard Rock Cafe</div><div class="arc-match">★ 88% match · ₹350</div></div>
+        </div>
+      </div>
+      <div class="ai-input-row">
+        <input class="ai-inp" id="aiInp" placeholder="What are you in the mood for?" onkeydown="if(event.key==='Enter')sendChat()"/>
+        <button class="ai-send-btn" onclick="sendChat()">→</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── LIVE SEATS ──────────────────────────────────────── -->
+<section class="sec sec-dark" id="live-seats">
+  <div class="live-showcase">
+    <div class="reveal">
+      <div class="sec-eyebrow">New Feature</div>
+      <h2 class="sec-title">Seats Updating<br><em>Right Now.</em></h2>
+      <p class="sec-sub">See exactly how many seats remain — live. Watch the seat map change in real time as other users book. No more refreshing the page hoping your seat is still there.</p>
+      <div style="display:flex;flex-direction:column;gap:14px;margin-top:8px">
+        <div class="ti-point">
+          <div class="ti-icon" style="background:rgba(244,63,94,0.12)">⚡</div>
+          <div class="ti-text"><h4>WebSocket Real-Time Updates</h4><p>ShowSync uses Supabase Realtime — every seat change broadcasts to all users watching the same show, instantly.</p></div>
+        </div>
+        <div class="ti-point">
+          <div class="ti-icon" style="background:rgba(245,158,11,0.12)">🔒</div>
+          <div class="ti-text"><h4>10-Minute Seat Lock</h4><p>When you click a seat, it's reserved for 10 minutes — visible to all other users as locked. A countdown timer shows how long you have to complete your booking.</p></div>
+        </div>
+        <div class="ti-point">
+          <div class="ti-icon" style="background:rgba(16,185,129,0.12)">📊</div>
+          <div class="ti-text"><h4>Live Availability Stats</h4><p>Available, filling fast, booked, and your selected seats — all tracked live with progress bars so you can make fast, informed decisions.</p></div>
+        </div>
+      </div>
+    </div>
+    <div class="live-demo reveal">
+      <div class="live-header">
+        <div><div class="live-title-sm">Devara Part 2 · 7:30 PM</div><div style="font-size:11px;color:var(--muted);margin-top:2px">Sudarshan 35MM · Screen 1</div></div>
+        <div class="live-timer" id="liveTimer">Live · 0 booked</div>
+      </div>
+      <div class="live-body">
+        <div class="screen-glow"></div>
+        <div class="screen-label">◀ SCREEN ▶</div>
+        <div class="t3d-grid" id="liveGrid"></div>
+        <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:10px" id="liveInfo">Click any seat to select · Updates live every 8 seconds</div>
+      </div>
+      <div class="live-stats-row">
+        <div class="ls-stat"><div class="ls-val" style="color:var(--green)" id="ls1">--</div><div class="ls-lbl">Available</div></div>
+        <div class="ls-stat"><div class="ls-val" style="color:var(--yellow)" id="ls2">--</div><div class="ls-lbl">Filling Fast</div></div>
+        <div class="ls-stat"><div class="ls-val" style="color:var(--muted)" id="ls3">--</div><div class="ls-lbl">Booked</div></div>
+        <div class="ls-stat"><div class="ls-val" style="color:var(--orange)" id="ls4">0</div><div class="ls-lbl">Your Picks</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── THEATRE GALLERY ─────────────────────────────────── -->
+<section class="sec" id="theatres">
+  <div class="sec-center reveal">
+    <div class="sec-eyebrow">New Feature</div>
+    <h2 class="sec-title">See Inside<br><em>Before You Go.</em></h2>
+    <p class="sec-sub">Every theatre on ShowSync comes with real interior photos, amenity ratings, and verified reviews — so you always know what to expect before you leave home.</p>
+  </div>
+  <div class="gallery-theatre-tabs reveal">
+    <div class="gtt active" onclick="switchTheatre(0,this)">🎬 PVR IMAX Inorbit</div>
+    <div class="gtt" onclick="switchTheatre(1,this)">🎭 Cinepolis GVK One</div>
+    <div class="gtt" onclick="switchTheatre(2,this)">👑 AMB Cinemas</div>
+    <div class="gtt" onclick="switchTheatre(3,this)">🏛️ Sudarshan 35MM</div>
+  </div>
+  <div class="gallery-showcase reveal" id="galleryGrid"></div>
+  <div class="reveal" style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;max-width:820px;margin:0 auto" id="amenityRow"></div>
+</section>
+
+<!-- ── REVIEWS ────────────────────────────────────────── -->
+<section class="sec sec-dark" id="reviews">
+  <div class="reveal" style="margin-bottom:40px">
+    <div class="sec-eyebrow">New Feature</div>
+    <h2 class="sec-title">Real Reviews.<br><em>Real Viewers.</em></h2>
+    <p class="sec-sub" style="max-width:580px">Only users with confirmed ShowSync bookings can leave reviews — and only after they've actually watched the film. No paid promotions. No fake ratings.</p>
+  </div>
+  <div class="reviews-grid reveal">
+    <div class="rating-big-box">
+      <div class="rb-num">4.8</div>
+      <div class="rb-stars">★★★★★</div>
+      <div class="rb-count">2,341 verified reviews</div>
+      <div class="rb-bars" id="ratingBars"></div>
+    </div>
+    <div class="review-cards" id="reviewCards"></div>
+  </div>
+</section>
+
+<!-- ── ZERO FEE ────────────────────────────────────────── -->
+<section class="sec" id="zero-fee">
+  <div class="sec-center reveal">
+    <div class="sec-eyebrow">The ShowSync Promise</div>
+    <h2 class="sec-title">You Pay for the Ticket.<br><em>Nothing Else.</em></h2>
+    <p class="sec-sub">BookMyShow charges a convenience fee on every single booking. We think that's wrong. ShowSync will never charge you to use the platform.</p>
+  </div>
+  <div class="fee-compare reveal">
+    <div class="fee-box bms">
+      <div class="fee-label">BookMyShow</div>
+      <div class="fee-amount">₹99</div>
+      <div class="fee-sub">per ticket convenience fee<br>(up to ₹99 per ticket, charged every booking)</div>
+    </div>
+    <div class="fee-box ss">
+      <div class="fee-label">ShowSync</div>
+      <div class="fee-amount">₹0</div>
+      <div class="fee-sub">convenience fee<br>always, on every booking, for every user</div>
+    </div>
+  </div>
+  <div class="sec-center reveal">
+    <p style="font-size:14px;color:var(--muted);max-width:500px;margin:0 auto">On a 4-person outing at ₹350/ticket, BMS adds up to ₹396 in fees on top. ShowSync adds exactly ₹0.</p>
+  </div>
+</section>
+
+<!-- ── COMPARISON ─────────────────────────────────────── -->
+<section class="sec sec-dark" id="compare">
+  <div class="sec-center reveal" style="margin-bottom:36px">
+    <div class="sec-eyebrow">ShowSync vs BookMyShow</div>
+    <h2 class="sec-title">We Compared.<br><em>You Decide.</em></h2>
+  </div>
+  <div class="compare-table reveal">
+    <div class="ct-header">
+      <div class="ct-cell">Feature</div>
+      <div class="ct-cell center">BookMyShow</div>
+      <div class="ct-cell center ct-ss-header">ShowSync</div>
+    </div>
+    <div id="compareRows"></div>
+  </div>
+  <div class="sec-center reveal" style="margin-top:20px">
+    <p style="font-size:12px;color:var(--slate)">ShowSync leads on 19 of 21 features · 3 new features added in v2.0</p>
+  </div>
+</section>
+
+<!-- ── FOR ORGANISERS ─────────────────────────────────── -->
+<section class="sec" id="organisers">
+  <div class="reveal" style="margin-bottom:40px">
+    <div class="sec-eyebrow">For Event Organisers & Theatres</div>
+    <h2 class="sec-title">List Once.<br><em>Reach Everyone.</em></h2>
+    <p class="sec-sub" style="max-width:580px">ShowSync gives independent theatres and event organisers the tools BMS never built for them — at a fraction of the commission.</p>
+  </div>
+  <div class="org-grid reveal" id="orgGrid"></div>
+</section>
+
+<!-- ── PRICING ────────────────────────────────────────── -->
+<section class="sec sec-dark" id="pricing">
+  <div class="sec-center reveal" style="margin-bottom:48px">
+    <div class="sec-eyebrow">Pricing</div>
+    <h2 class="sec-title">Simple. Honest. <em>Fair.</em></h2>
+    <p class="sec-sub">All the features, zero hidden costs. Upgrade only if you want more.</p>
+  </div>
+  <div class="pricing-grid reveal" id="pricingGrid"></div>
+</section>
+
+<!-- ── CTA / WAITLIST ─────────────────────────────────── -->
+<section class="cta-section" id="waitlist">
+  <div class="cta-bg"></div>
+  <div class="cta-content reveal">
+    <div class="sec-eyebrow" style="justify-content:center;display:flex;margin-bottom:16px">Hyderabad — Launching Soon</div>
+    <h2 class="cta-h2">Your Night Deserves<br>Better Than <em>Convenience Fees.</em></h2>
+    <p class="cta-sub">Join 2,400+ Hyderabad users already on the waitlist. Be first to book when ShowSync goes live.</p>
+    <div style="max-width:480px;margin:0 auto 24px;display:flex;gap:10px;flex-wrap:wrap">
+      <input type="email" placeholder="Enter your email address" id="emailInp" style="flex:1;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:13px;padding:14px 18px;color:var(--text);font-size:14px;font-family:var(--font-body);outline:none;min-width:240px"/>
+      <button class="hero-btn-p" onclick="joinWaitlist()" style="flex-shrink:0">Join Waitlist →</button>
+    </div>
+    <div class="cta-note">
+      <span>✓ Zero spam</span>
+      <span>✓ First access guaranteed</span>
+      <span>✓ Free forever for early members</span>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ──────────────────────────────────────────── -->
+<footer>
+  <div class="footer-top">
+    <div class="footer-brand">
+      <div class="fb-logo">ShowSync</div>
+      <p>India's first AI-powered cinema and events ticketing platform. Launching in Hyderabad. Zero convenience fee, always.</p>
+      <div class="footer-socials">
+        <div class="fs-btn" title="Twitter/X">𝕏</div>
+        <div class="fs-btn" title="Instagram">📸</div>
+        <div class="fs-btn" title="LinkedIn">in</div>
+        <div class="fs-btn" title="GitHub">⌨</div>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h5>Product</h5>
+      <a href="#features">All Features</a>
+      <a href="#how-it-works">How It Works</a>
+      <a href="#seat-view">3D Seat View</a>
+      <a href="#snacks">Snack Pre-Order</a>
+      <a href="#ai">AI Discovery</a>
+      <a href="#reviews">Reviews</a>
+    </div>
+    <div class="footer-col">
+      <h5>Company</h5>
+      <a href="#">About Us</a>
+      <a href="#">Achievers Community</a>
+      <a href="#">Careers</a>
+      <a href="#">Blog</a>
+      <a href="#">Press Kit</a>
+    </div>
+    <div class="footer-col">
+      <h5>Legal & Support</h5>
+      <a href="#">Privacy Policy</a>
+      <a href="#">Cancellation Policy</a>
+      <a href="#">Terms of Service</a>
+      <a href="#">Contact Us</a>
+      <a href="#organisers">For Organisers</a>
+      <a href="#">Help Centre</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-copy">© 2026 ShowSync Technologies Pvt. Ltd. · Hyderabad, India</div>
+    <div class="footer-made">Built by <a href="https://linkedin.com/in/sameer-navvuluri-836898320">Navvuluri Sameer</a> &nbsp;·&nbsp; sameer@showsync.in &nbsp;·&nbsp; +91 98667 08706</div>
+  </div>
+</footer>
+
+<script>
+// ── Cursor ──────────────────────────────────────────────
+const cur=document.getElementById('cursor'),cr=document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=mx+'px';cur.style.top=my+'px'});
+(function loop(){rx+=(mx-rx)*.1;ry+=(my-ry)*.1;cr.style.left=rx+'px';cr.style.top=ry+'px';requestAnimationFrame(loop)})();
+
+// ── Nav scroll ──────────────────────────────────────────
+const nav=document.getElementById('nav');
+window.addEventListener('scroll',()=>{
+  nav.classList.toggle('scrolled',window.scrollY>60);
+  document.getElementById('scrollTop').classList.toggle('visible',window.scrollY>400);
+});
+
+// ── Ticker ──────────────────────────────────────────────
+const tickerItems=['🎬 Kalki 2898 AD — Now Showing','🎵 Arijit Singh Live · HITEX · 10 May','🍿 Zero convenience fee on all bookings','🎭 3D Seat View — Pick before you sit','😂 Zakir Khan Comedy Night · 11 May','🏏 IPL: SRH vs MI · Rajiv Gandhi Stadium','⭐ 2,341 verified reviews on ShowSync','🔴 Live seat availability · Real-time updates','👥 Group booking + split payment now live'];
+const track=document.getElementById('ticker');
+const items=tickerItems.concat(tickerItems);
+track.innerHTML=items.map(t=>`<div class="ticker-item"><span class="ticker-sep">✦</span>${t}</div>`).join('');
+
+// ── Scroll reveal ───────────────────────────────────────
+const obs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('vis')}),{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+
+// ── 3D Seat Grid ────────────────────────────────────────
+const ROWS=['A','B','C','D','E','F','G','H'];
+const TAKEN=['A2','A7','B3','B8','C1','C5','D4','D9','E2','E7','F3','F6','G1','G8','H5'];
+const ZONE={A:'fi',B:'fi',C:'fi',D:'av',E:'av',F:'bv',G:'bv',H:'bv'};
+const ZONE_COLOR={A:'var(--rose)',B:'var(--rose)',C:'var(--rose)',D:'var(--yellow)',E:'var(--yellow)',F:'var(--green)',G:'var(--green)',H:'var(--green)'};
+const ZONE_LABEL={A:'Front Row',B:'Front Row',C:'Front Row',D:'Mid Zone',E:'Mid Zone',F:'Best View',G:'Best View',H:'Best View'};
+let selectedSeats=[];
+
+function buildSeatGrid(gridId){
+  const g=document.getElementById(gridId);
+  if(!g)return;
+  g.innerHTML=ROWS.map(row=>{
+    const left=Array.from({length:5},(_,i)=>{const id=`${row}${i+1}`;return seatEl(id,row)}).join('');
+    const right=Array.from({length:6},(_,i)=>{const id=`${row}${i+7}`;return seatEl(id,row)}).join('');
+    return `<div class="t3d-row"><div class="t3d-label" style="color:${ZONE_COLOR[row]}">${row}</div>${left}<div class="t3d-aisle"></div>${right}</div>`;
+  }).join('');
+}
+function seatEl(id,row){
+  const taken=TAKEN.includes(id),sel=selectedSeats.includes(id);
+  const cls=taken?'tk':sel?'sl':(ZONE[row]||'av');
+  const click=!taken?`onclick="toggleSeat('${id}','${row}')"`:'' ;
+  return `<div class="t3d-seat ${cls}" title="${id}" ${click}></div>`;
+}
+function toggleSeat(id,row){
+  const i=selectedSeats.indexOf(id);
+  if(i>-1)selectedSeats.splice(i,1);else selectedSeats.push(id);
+  buildSeatGrid('t3dGrid');
+  buildSeatGrid('liveGrid');
+  updateLiveStats();
+  const zi=document.getElementById('zoneInfo');
+  if(zi&&selectedSeats.length>0){
+    const zones=[...new Set(selectedSeats.map(s=>ZONE_LABEL[s[0]]))];
+    zi.innerHTML=`<p>✓ ${selectedSeats.length} seat${selectedSeats.length>1?'s':''} selected: ${selectedSeats.join(', ')} · Zone: ${zones.join(', ')} · ₹${selectedSeats.length*350} total</p>`;
+    zi.querySelector('p').style.color='var(--orange)';
+  } else if(zi){
+    zi.innerHTML='<p>Click any seat to select it — watch the zone info update live</p>';
+    zi.querySelector('p').style.color='';
+  }
+}
+buildSeatGrid('t3dGrid');
+buildSeatGrid('liveGrid');
+
+// ── Live seat simulation ────────────────────────────────
+let liveBooked=0;
+let liveTaken=[...TAKEN];
+function updateLiveStats(){
+  const total=ROWS.length*11;
+  const avail=total-liveTaken.length-selectedSeats.length;
+  const filling=ROWS.filter(r=>['C','D'].includes(r)).length*11-liveTaken.filter(s=>['C','D'].includes(s[0])).length;
+  document.getElementById('ls1').textContent=Math.max(0,avail);
+  document.getElementById('ls2').textContent=Math.max(0,filling);
+  document.getElementById('ls3').textContent=liveTaken.length;
+  document.getElementById('ls4').textContent=selectedSeats.length;
+  const li=document.getElementById('liveInfo');
+  if(li&&selectedSeats.length>0){
+    li.textContent=`✓ ${selectedSeats.length} seat${selectedSeats.length>1?'s':''} selected: ${selectedSeats.join(', ')} · ₹${selectedSeats.length*280}`;
+    li.style.color='var(--orange)';
+  }
+}
+updateLiveStats();
+setInterval(()=>{
+  if(liveTaken.length>=ROWS.length*11-8)return;
+  const r=ROWS[Math.floor(Math.random()*ROWS.length)];
+  const n=Math.floor(Math.random()*11)+1;
+  const id=`${r}${n}`;
+  if(!liveTaken.includes(id)&&!selectedSeats.includes(id)){
+    liveTaken.push(id);liveBooked++;
+    document.getElementById('liveTimer').textContent=`Live · ${liveBooked} booked`;
+    buildSeatGrid('liveGrid');updateLiveStats();
+  }
+},7000);
+
+// ── Snack demo ──────────────────────────────────────────
+const SNACKS=[
+  {id:1,e:'🍿',n:'Large Popcorn',p:180,hot:true,qty:0},
+  {id:2,e:'🌮',n:'Nachos + Dip',p:150,hot:false,qty:0},
+  {id:3,e:'🥤',n:'Pepsi 500ml',p:80,hot:true,qty:0},
+  {id:4,e:'🌭',n:'Hot Dog',p:120,hot:false,qty:0},
+  {id:5,e:'🎁',n:'Combo Deal',p:299,hot:true,qty:0},
+  {id:6,e:'🍦',n:'Ice Cream',p:90,hot:false,qty:0},
+];
+function renderSnacks(){
+  const g=document.getElementById('snackDemo');
+  if(!g)return;
+  g.innerHTML=SNACKS.map(s=>`
+    <div class="snack-card ${s.qty>0?'active-snack':''}" id="sc${s.id}">
+      ${s.hot?'<div class="hot-tag">🔥 HOT</div>':''}
+      <span class="snack-emoji">${s.e}</span>
+      <div class="snack-name">${s.n}</div>
+      <div class="snack-price">₹${s.p}</div>
+      <div class="snack-qty-row">
+        <button class="sq-btn sq-minus" onclick="updateSnack(${s.id},-1)">−</button>
+        <div class="sq-num">${s.qty}</div>
+        <button class="sq-btn sq-plus" onclick="updateSnack(${s.id},1)">+</button>
+      </div>
+    </div>`).join('');
+  const total=SNACKS.reduce((s,sn)=>s+sn.qty*sn.p,0);
+  const count=SNACKS.filter(s=>s.qty>0).length;
+  const ss=document.getElementById('snackSummary');
+  if(ss){
+    ss.style.display=total>0?'flex':'none';
+    if(total>0){
+      document.getElementById('ssItems').textContent=`${count} item${count>1?'s':''} ordered`;
+      document.getElementById('ssTotal').textContent=`₹${total}`;
+    }
+  }
+}
+function updateSnack(id,d){
+  const s=SNACKS.find(x=>x.id===id);if(!s)return;
+  s.qty=Math.max(0,s.qty+d);renderSnacks();
+}
+renderSnacks();
+
+// ── AI Chat ─────────────────────────────────────────────
+const replies=[
+  'Great choice! I found 6 perfect matches for that. Want me to book the top pick? 🎟️',
+  'Based on your history, you\'ll love this one. 94% match guaranteed! ✨',
+  'Booking that right now... your seat E5 is reserved! 🪑',
+  'I also found a snack combo deal that saves you ₹80 — want me to add it? 🍿',
+  'Your popcorn will be waiting at your seat at interval. Enjoy the show! 🎬',
+];
+let replyIdx=0;
+function setMood(el,mood){
+  document.querySelectorAll('.mood-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  const msgs=document.getElementById('aiMessages');
+  msgs.innerHTML+=`<div class="ai-msg user"><div class="ai-msg-av usr-av">S</div><div class="ai-bubble">Show me picks for ${mood}</div></div>`;
+  setTimeout(()=>{
+    msgs.innerHTML+=`<div class="ai-msg bot"><div class="ai-msg-av bot-av">✦</div><div class="ai-bubble">Perfect! Finding ${mood} picks for Hyderabad tonight... here are your top 3 matches! 🎯</div></div>`;
+    msgs.scrollTop=msgs.scrollHeight;
+  },700);
+  msgs.scrollTop=msgs.scrollHeight;
+}
+function sendChat(){
+  const inp=document.getElementById('aiInp');const msg=inp.value.trim();if(!msg)return;
+  const msgs=document.getElementById('aiMessages');
+  msgs.innerHTML+=`<div class="ai-msg user"><div class="ai-msg-av usr-av">S</div><div class="ai-bubble">${msg}</div></div>`;
+  inp.value='';
+  setTimeout(()=>{
+    msgs.innerHTML+=`<div class="ai-msg bot"><div class="ai-msg-av bot-av">✦</div><div class="ai-bubble">${replies[replyIdx%replies.length]}</div></div>`;
+    replyIdx++;msgs.scrollTop=msgs.scrollHeight;
+  },900);
+  msgs.scrollTop=msgs.scrollHeight;
+}
+
+// ── Theatre Gallery ─────────────────────────────────────
+const THEATRES=[
+  {name:'PVR IMAX Inorbit',cells:[{bg:'linear-gradient(135deg,#0d1a2e,#1a3060)',e:'🎬',l:'IMAX Screen'},{bg:'linear-gradient(135deg,#1a0a00,#3d2000)',e:'🛋️',l:'Recliner Seats'},{bg:'linear-gradient(135deg,#0a1a00,#1a3a00)',e:'🍿',l:'Food Court'},{bg:'linear-gradient(135deg,#0a0a1a,#1a0a2e)',e:'🅿️',l:'Parking'},{bg:'linear-gradient(135deg,#1a0505,#3d0e0e)',e:'🚪',l:'Grand Lobby'}],amenities:['IMAX','Dolby Atmos','4K Laser','Recliners','Premium Lounge','Valet Parking']},
+  {name:'Cinepolis GVK One',cells:[{bg:'linear-gradient(135deg,#0a1a0a,#1a3010)',e:'🎠',l:'4DX Screen'},{bg:'linear-gradient(135deg,#1a1a0a,#3a2a00)',e:'💺',l:'D-BOX Seats'},{bg:'linear-gradient(135deg,#0a0a1a,#10102a)',e:'🎮',l:'Kids Zone'},{bg:'linear-gradient(135deg,#1a0505,#2a0000)',e:'🍕',l:'Snack Corner'},{bg:'linear-gradient(135deg,#0a0a20,#181830)',e:'🌟',l:'VIP Lounge'}],amenities:['4DX','D-BOX Seats','Dolby 7.1','Kids Zone','MX4D','Premium Snacks']},
+  {name:'AMB Cinemas',cells:[{bg:'linear-gradient(135deg,#1a1000,#3a2800)',e:'👑',l:'Royal Audi'},{bg:'linear-gradient(135deg,#0a0a05,#1a1808)',e:'🍽️',l:'Dine-In'},{bg:'linear-gradient(135deg,#0a0510,#1a0a20)',e:'🥂',l:'Champagne Bar'},{bg:'linear-gradient(135deg,#100510,#201020)',e:'🛎️',l:'Butler Service'},{bg:'linear-gradient(135deg,#050a1a,#0a1530)',e:'🎩',l:'Concierge'}],amenities:['Ultra Luxury','Butler Service','Dine-In','Fine Dining','Bar','Concierge']},
+  {name:'Sudarshan 35MM',cells:[{bg:'linear-gradient(135deg,#0a0a0a,#181818)',e:'📽️',l:'Classic Screen'},{bg:'linear-gradient(135deg,#0a1515,#102525)',e:'🎞️',l:'35MM Print'},{bg:'linear-gradient(135deg,#150a05,#2a1505)',e:'☕',l:'Snack Bar'},{bg:'linear-gradient(135deg,#050a05,#0a1a0a)',e:'🏛️',l:'Heritage Lobby'},{bg:'linear-gradient(135deg,#0a0505,#1a0a0a)',e:'⭐',l:'Iconic Hyd Cinema'}],amenities:['4K Projection','Dolby Atmos','Classic Heritage','Affordable Pricing','Central Location']},
+];
+let currentTheatre=0;
+function switchTheatre(idx,el){
+  document.querySelectorAll('.gtt').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');currentTheatre=idx;renderGallery();
+}
+function renderGallery(){
+  const th=THEATRES[currentTheatre];
+  const gg=document.getElementById('galleryGrid');
+  if(gg)gg.innerHTML=th.cells.map((c,i)=>`
+    <div class="gallery-cell" style="background:${c.bg}">
+      <div class="gc-inner">${c.e}</div>
+      <div class="gc-overlay"></div>
+      <div class="gc-label">${c.l}</div>
+    </div>`).join('');
+  const ar=document.getElementById('amenityRow');
+  if(ar)ar.innerHTML=th.amenities.slice(0,4).map(a=>`
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center;font-size:12px;font-weight:600;color:var(--purple)">
+      <div style="font-size:20px;margin-bottom:6px">✓</div>${a}
+    </div>`).join('');
+}
+renderGallery();
+
+// ── Reviews ─────────────────────────────────────────────
+const RATINGS=[{s:5,c:1640},{s:4,c:420},{s:3,c:180},{s:2,c:60},{s:1,c:41}];
+const rtotal=RATINGS.reduce((s,r)=>s+r.c,0);
+const barsEl=document.getElementById('ratingBars');
+if(barsEl)barsEl.innerHTML=RATINGS.map(r=>`
+  <div class="rbb-row">
+    <div class="rbb-lbl">${r.s}</div>
+    <div class="rbb-track"><div class="rbb-fill" style="width:${Math.round(r.c/rtotal*100)}%"></div></div>
+    <div class="rbb-cnt">${r.c>999?(r.c/1000).toFixed(1)+'k':r.c}</div>
+  </div>`).join('');
+
+const REVIEWS=[
+  {name:'Rahul M.',av:'👨',bg:'rgba(251,146,60,0.15)',stars:5,date:'2 days ago',body:'Absolutely game-changing. The 3D seat picker helped me choose the perfect spot — and my popcorn was already at my seat when the interval started. This is how cinema should work. Zero convenience fee is the real deal.',tags:['3D Seat View','Snack Pre-Order','Zero Fee'],helpful:142},
+  {name:'Priya S.',av:'👩',bg:'rgba(244,63,94,0.15)',stars:5,date:'4 days ago',body:'Finally an app that actually knows what I want to watch. The AI recommended Zakir Khan Comedy Night for our girls\' night and it was perfect. Booking took literally 2 minutes and we paid exactly what the ticket cost — nothing more.',tags:['AI Discovery','Fast Booking','Verified Review'],helpful:98},
+  {name:'Karthik R.',av:'🧑',bg:'rgba(129,140,248,0.15)',stars:4,date:'1 week ago',body:'The live seat availability is genius. I was watching seats disappear in real time during the Kalki premiere — grabbed the last two best-view seats just in time. ShowSync is a completely different experience from BMS.',tags:['Live Seats','Best View Zone'],helpful:67},
+];
+const rcEl=document.getElementById('reviewCards');
+if(rcEl)rcEl.innerHTML=REVIEWS.map(r=>`
+  <div class="rv-card">
+    <div class="rv-top">
+      <div class="rv-user">
+        <div class="rv-av" style="background:${r.bg}">${r.av}</div>
+        <div><div class="rv-name">${r.name}</div><div class="rv-meta">${r.date} · Verified Booking ✓</div></div>
+      </div>
+      <div class="rv-stars">${'★'.repeat(r.stars)}</div>
+    </div>
+    <div class="rv-body">${r.body}</div>
+    <div class="rv-tags">${r.tags.map(t=>`<div class="rv-tag">${t}</div>`).join('')}</div>
+    <div class="verified-badge">✓ ShowSync verified purchase</div>
+  </div>`).join('');
+
+// ── Comparison table ────────────────────────────────────
+const COMPARE=[
+  {f:'3D Theater Visualization',bms:false,ss:true,n:false},
+  {f:'Snack Pre-Order + Seat Delivery',bms:false,ss:true,n:false},
+  {f:'Live Real-Time Seat Availability',bms:false,ss:true,n:true},
+  {f:'Theatre Photo Gallery',bms:false,ss:true,n:true},
+  {f:'Verified Post-Show Reviews',bms:'Limited',ss:true,n:true},
+  {f:'AI-Powered Discovery Feed',bms:false,ss:true,n:false},
+  {f:'Mood-Based Natural Language Search',bms:false,ss:true,n:false},
+  {f:'Group Booking + Split Payment',bms:false,ss:true,n:false},
+  {f:'Zero Convenience Fee',bms:'₹20–99',ss:'₹0',n:false},
+  {f:'Smart Cancellation + Instant Refund',bms:'Manual',ss:'Automatic',n:false},
+  {f:'Seat Lock Timer (10 min)',bms:false,ss:true,n:false},
+];
+const crEl=document.getElementById('compareRows');
+if(crEl)crEl.innerHTML=COMPARE.map(r=>`
+  <div class="ct-row">
+    <div class="ct-cell">${r.f}${r.n?'<span class="new-tag">NEW</span>':''}</div>
+    <div class="ct-cell center"><span class="ct-check ${r.bms===false?'n':r.bms===true?'y':'p'}">${r.bms===false?'✗':r.bms===true?'✓':r.bms}</span></div>
+    <div class="ct-cell center"><span class="ct-check ${r.ss===true||typeof r.ss==='string'?'y':''}">${r.ss===true?'✓':r.ss}</span></div>
+  </div>`).join('');
+
+// ── For Organisers ──────────────────────────────────────
+const ORGS=[
+  {n:'6.5%',t:'Commission Rate',d:'vs BMS 10–15%. Keep more of every ticket you sell. Free for the first 3 months.'},
+  {n:'48h',t:'Payout Timeline',d:'Get paid within 48 hours of each show. No long settlement cycles, no withheld funds.'},
+  {n:'100%',t:'Control Over Listing',d:'Add, edit, or remove your shows, prices, and seat configurations anytime from your admin dashboard.'},
+  {n:'₹0',t:'Setup Cost',d:'No joining fee, no integration fee, no monthly platform fee. List your theatre or event at no upfront cost.'},
+  {n:'F&B',t:'Snack Pre-Order Revenue',d:'Enable snack pre-orders and earn from your F&B sales through ShowSync — we handle the order flow.'},
+  {n:'📊',t:'Real-Time Analytics',d:'Live booking data, revenue breakdown, seat fill rates, and customer demographics — all in your dashboard.'},
+];
+const ogEl=document.getElementById('orgGrid');
+if(ogEl)ogEl.innerHTML=ORGS.map(o=>`
+  <div class="org-card">
+    <div class="org-num">${o.n}</div>
+    <div class="org-title">${o.t}</div>
+    <div class="org-desc">${o.d}</div>
+  </div>`).join('');
+
+// ── Pricing ─────────────────────────────────────────────
+const PLANS=[
+  {plan:'Basic',price:'Free',period:'forever',badge:null,featured:false,features:[
+    {on:true,t:'Browse movies & events'},
+    {on:true,t:'AI mood discovery'},
+    {on:true,t:'3D seat selection'},
+    {on:true,t:'Zero convenience fee'},
+    {on:true,t:'E-ticket & QR code'},
+    {on:false,t:'Snack pre-order'},
+    {on:false,t:'Group booking'},
+    {on:false,t:'Priority support'},
+  ]},
+  {plan:'ShowSync+',price:'₹99',period:'per month',badge:'Most Popular',featured:true,features:[
+    {on:true,t:'Everything in Basic'},
+    {on:true,t:'Snack pre-order on every booking'},
+    {on:true,t:'Group booking + split pay'},
+    {on:true,t:'Early access to new shows'},
+    {on:true,t:'Priority customer support'},
+    {on:true,t:'Exclusive member discounts'},
+    {on:true,t:'Weekly AI "Your Weekend" picks'},
+    {on:false,t:'Free cancellation upgrade'},
+  ]},
+  {plan:'SuperSync',price:'₹299',period:'per year',badge:null,featured:false,features:[
+    {on:true,t:'Everything in ShowSync+'},
+    {on:true,t:'Free cancellation on all bookings'},
+    {on:true,t:'Priority FIFO seat access'},
+    {on:true,t:'Dedicated support line'},
+    {on:true,t:'Invite-only premiere events'},
+    {on:true,t:'Annual savings vs monthly: ₹889'},
+    {on:true,t:'ShowSync Partner F&B discounts'},
+    {on:true,t:'Digital membership card'},
+  ]},
+];
+const pgEl=document.getElementById('pricingGrid');
+if(pgEl)pgEl.innerHTML=PLANS.map(p=>`
+  <div class="price-card ${p.featured?'featured':''}">
+    ${p.badge?`<div class="price-badge">${p.badge}</div>`:''}
+    <div class="price-plan">${p.plan}</div>
+    <div class="price-amount" style="color:${p.featured?'var(--orange)':'var(--text)'}">${p.price}</div>
+    <div class="price-period">${p.period}</div>
+    <div class="price-divider"></div>
+    <div class="price-features">
+      ${p.features.map(f=>`<div class="pf-item ${f.on?'on':''}"><span class="pf-icon">${f.on?'✓':'○'}</span>${f.t}</div>`).join('')}
+    </div>
+    <button class="price-btn ${p.featured?'solid':'ghost'}">${p.featured?'Get ShowSync+':'Get Started'}</button>
+  </div>`).join('');
+
+// ── Waitlist ────────────────────────────────────────────
+function joinWaitlist(){
+  const e=document.getElementById('emailInp').value.trim();
+  if(!e||!e.includes('@'))return alert('Please enter a valid email address.');
+  document.getElementById('emailInp').value='';
+  const btn=document.querySelector('.cta-content .hero-btn-p');
+  if(btn){btn.textContent='✓ You\'re on the list!';btn.style.background='var(--green)';setTimeout(()=>{btn.textContent='Join Waitlist →';btn.style.background=''},3000);}
+}
+
+// ── Mobile menu ─────────────────────────────────────────
+function toggleMenu(){
+  const nl=document.querySelector('.nav-links');
+  nl.style.display=nl.style.display==='flex'?'none':'flex';
+  nl.style.flexDirection='column';
+  nl.style.position='absolute';
+  nl.style.top='70px';
+  nl.style.left='0';
+  nl.style.right='0';
+  nl.style.background='rgba(6,9,15,0.98)';
+  nl.style.padding='20px';
+  nl.style.gap='16px';
+  nl.style.borderBottom='1px solid rgba(255,255,255,0.07)';
+}
+
+// ── Animate rating bars ─────────────────────────────────
+setTimeout(()=>{
+  document.querySelectorAll('.rbb-fill').forEach(el=>{
+    const w=el.style.width;el.style.width='0';
+    setTimeout(()=>{el.style.width=w;},100);
+  });
+},800);
+</script>
+</body>
+</html>
